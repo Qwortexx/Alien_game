@@ -10,5 +10,11 @@ class Settings:
         self.bullet_width = 5
         self.bullet_color = (255, 0, 0)
         self.bullet_allowed = 5
+
+        self.speedup_scale = 1.1
+
+
         self.spawn_interval = 10
-        self.ship_left = 2
+        self.ship_left = 3
+
+        self.alien_points = 50

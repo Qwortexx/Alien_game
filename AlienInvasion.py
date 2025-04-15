@@ -8,6 +8,8 @@ from ship import Ship
 from alien import Alien
 from time import sleep
 from game_stats import GameStats
+from button import Button
+from scoreboard import Scoreboard
 #from ship02 import ship02
 
 class AlienInvasion:
@@ -27,6 +29,9 @@ class AlienInvasion:
         self.last_spawn_time = time.time()
         #self.ship02 = ship02(self)
         self.stats = GameStats(self)
+        self.sb = Scoreboard(self)
+
+        self.play_button = Button(self,"Play")
 
         self._create_fleet()
 
@@ -45,6 +50,9 @@ class AlienInvasion:
         for event in pygame.event.get(): # перевірка чи кнопку нажато чи ні
             if event.type == pygame.QUIT:
                 sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                self._check_play_button(mouse_pos)
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
@@ -87,6 +95,14 @@ class AlienInvasion:
         print(len(self.bullets))
         # якщо куля влучила в прибульця то вони видаляються
         collections = pygame.sprite.groupcollide(self.bullets, self.aliens, True,True)
+        if collections:
+            for aliens in collections.values():
+                # Додаємо очки за кожного збитого прибульця
+                self.stats.score += self.settings.alien_points * len(aliens)
+            # Оновлюємо зображення рахунку
+            self.sb.prep_score()
+            self.sb.check_high_score()
+
 
     def _update_screen(self):  # Відображення
         self.screen.blit(self.bg_image, (0, 0))
@@ -94,21 +110,23 @@ class AlienInvasion:
         if self.stats.game_active:
             self.ship.blitme()
             self.aliens.draw(self.screen)
+            self.sb.show_score()
             for bullet in self.bullets.sprites():
                 bullet.draw_bullet()
         else:
-            self._show_game_over()
+            if self.stats.game_over:
+               self._show_game_over()
+            self.play_button.draw_button()
 
         pygame.display.flip()
 
     def _show_game_over(self):
         font = pygame.font.SysFont(None, 72)
         text = font.render("Game Over!", True, (255, 0, 0))
-        text_rect = text.get_rect(center=(self.settings.screen_width // 2, self.settings.screen_height // 2))
+        text_rect = text.get_rect(center=(self.settings.screen_width // 2, self.settings.screen_height // 2.5))
         self.screen.blit(text, text_rect)
 
     def _create_fleet(self):
-        """Створює флот інопланетян у кілька рядів."""
         alien = Alien(self)
         alien_width, alien_height = alien.rect.size
 
@@ -123,7 +141,6 @@ class AlienInvasion:
             self._create_alien(alien_number, alien_width, alien_height)
 
     def _get_unique_positions(self, number_aliens_x, max_aliens, alien_width):
-        """Генерує унікальні позиції для нової хвилі, уникаючи накладання"""
         existing_positions = {alien.rect.x for alien in self.aliens}  # Координати вже існуючих інопланетян
         possible_positions = [i for i in range(number_aliens_x) if
                               (alien_width + 2 * alien_width * i) not in existing_positions]
@@ -132,7 +149,6 @@ class AlienInvasion:
         return random.sample(possible_positions, min(max_aliens, len(possible_positions)))
 
     def _create_alien(self, alien_number, alien_width, alien_height):
-        """Створює окремого інопланетянина у вказаній позиції та додає до групи."""
         alien = Alien(self)
         alien.x = alien_width + 2 * alien_width * alien_number
         alien.rect.x = alien.x
@@ -152,7 +168,6 @@ class AlienInvasion:
         print(len(self.aliens))
 
     def _update_alien_position(self):
-        """Оновлює позиції інопланетян і спавнить нові хвилі"""
         current_time = time.time()
 
         # Оновлення позицій інопланетян (рух вниз)
@@ -161,12 +176,15 @@ class AlienInvasion:
 
         # Перевірка: спавнимо нову хвилю тільки якщо всі прибульці знищені
         if not self.aliens and (current_time - self.last_spawn_time >= self.settings.spawn_interval):
+            self.stats.level += 1
+            self.sb.prep_level()
+
             self._create_fleet()
             self.last_spawn_time = current_time
 
     def _ship_hit(self):
+        self.stats.ship_left -= 1
         if self.stats.ship_left > 0:
-            self.stats.ship_left -= 1
 
             self.aliens.empty()
             self.bullets.empty()
@@ -177,6 +195,8 @@ class AlienInvasion:
             sleep(1)
         else:
             self.stats.game_active = False
+            self.stats.game_over = True
+            pygame.mouse.set_visible(True)
 
     def _check_aliens_bottom(self):
         screen_rect = self.screen.get_rect()
@@ -184,6 +204,25 @@ class AlienInvasion:
             if alien.rect.bottom >= screen_rect.bottom:
                 self._ship_hit()
                 break
+    def _check_play_button(self,mouse_pos):
+        button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+        if button_clicked and not self.stats.game_active:
+
+            self.stats.reset_stats()
+            self.stats.game_active = True
+            self.stats.game_over = False
+
+            self.sb.prep_level()
+
+
+            self.aliens.empty()
+            self.bullets.empty()
+
+
+            self._create_fleet()
+            self.ship.center_ship()
+            pygame.mouse.set_visible(False)
+
 
 if __name__ == '__main__':
     ai = AlienInvasion()
