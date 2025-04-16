@@ -12,6 +12,15 @@ from button import Button
 from scoreboard import Scoreboard
 #from ship02 import ship02
 
+pygame.init()
+
+pygame.mixer.music.load('C:/Python/alien_game/background_music.mp3')
+pygame.mixer.music.set_volume(0.3)
+pygame.mixer.music.play(-1)
+
+shot_sound = pygame.mixer.Sound('C:/Python/alien_game/short_shot_sound.wav')
+hit_sound = pygame.mixer.Sound('C:/Python/alien_game/hit_sound.wav')
+
 class AlienInvasion:
 
 
@@ -69,6 +78,7 @@ class AlienInvasion:
             self.ship.moving_down = True
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
+            shot_sound.play()
         elif event.key == pygame.K_q:
             sys.exit()
 
@@ -96,6 +106,7 @@ class AlienInvasion:
         # якщо куля влучила в прибульця то вони видаляються
         collections = pygame.sprite.groupcollide(self.bullets, self.aliens, True,True)
         if collections:
+            hit_sound.play()
             for aliens in collections.values():
                 # Додаємо очки за кожного збитого прибульця
                 self.stats.score += self.settings.alien_points * len(aliens)
