@@ -14,12 +14,12 @@ from scoreboard import Scoreboard
 
 pygame.init()
 
-pygame.mixer.music.load('C:/Python/alien_game/background_music.mp3')
+pygame.mixer.music.load('D:/Save/background_music.mp3')
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
 
-shot_sound = pygame.mixer.Sound('C:/Python/alien_game/short_shot_sound.wav')
-hit_sound = pygame.mixer.Sound('C:/Python/alien_game/hit_sound.wav')
+shot_sound = pygame.mixer.Sound('D:/Save/short_shot_sound.wav')
+hit_sound = pygame.mixer.Sound('D:/Save/hit_sound.wav')
 
 class AlienInvasion:
 
@@ -30,7 +30,7 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
-        self.bg_image = pygame.image.load('C:/Python/alien_game/background.bmp')
+        self.bg_image = pygame.image.load('D:/Save/background.bmp')
         self.bg_image = pygame.transform.scale(self.bg_image, (self.settings.screen_width, self.settings.screen_height))
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -226,7 +226,9 @@ class AlienInvasion:
             self.stats.game_active = True
             self.stats.game_over = False
 
+            self.sb.prep_score()
             self.sb.prep_level()
+            self.sb.prep_health()
 
 
             self.aliens.empty()
