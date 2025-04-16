@@ -1,5 +1,6 @@
 import pygame.font
-
+from pygame.sprite import Group
+from ship import Ship
 
 class Scoreboard:
     def __init__(self, ai_game):
@@ -7,15 +8,18 @@ class Scoreboard:
         self.screen_rect = self.screen.get_rect()
         self.settings = ai_game.settings
         self.stats = ai_game.stats
-
+     
         self.text_color = (255, 255, 255)
         self.sb_color = (38, 9, 61)
         self.font = pygame.font.SysFont(None, 48)
+
+        self.ai_game = ai_game
 
         self.prep_score()
         self.prep_high_score()
         self.prep_level()
         self.prep_labels()
+        self.prep_health()
 
     def prep_score(self):
         score_str = str(self.stats.score)
@@ -45,13 +49,13 @@ class Scoreboard:
         # Мітка для поточного рахунку
         self.score_label = self.font.render("Score:", True, self.text_color, self.sb_color)
         self.score_label_rect = self.score_label.get_rect()
-        self.score_label_rect.right = self.score_rect.left - 10
+        self.score_label_rect.right = self.score_rect.left - 50
         self.score_label_rect.top = self.score_rect.top
 
         # Мітка для рекорду
         self.high_score_label = self.font.render("Record:", True, self.text_color, self.sb_color)
         self.high_score_label_rect = self.high_score_label.get_rect()
-        self.high_score_label_rect.right = self.high_score_rect.left - 10
+        self.high_score_label_rect.right = self.high_score_rect.left - 50
         self.high_score_label_rect.top = self.high_score_rect.top
 
         # Мітка для рівня
@@ -73,7 +77,18 @@ class Scoreboard:
         self.screen.blit(self.level_label, self.level_label_rect)
         self.screen.blit(self.level_image, self.level_rect)
 
+        self.ships.draw(self.screen)
+
     def check_high_score(self):
         if self.stats.score > self.stats.high_score:
             self.stats.high_score = self.stats.score
             self.prep_high_score()
+
+    def prep_health(self):
+        self.ships = Group()
+        for ship_number in range(self.stats.ship_left):
+            ship = Ship(self.ai_game)
+            ship.rect.x = 10 + ship_number * ship.rect.width
+            ship.rect.y = 10
+            self.ships.add(ship)
+

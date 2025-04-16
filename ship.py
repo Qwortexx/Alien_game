@@ -1,7 +1,7 @@
 import pygame
+from pygame.sprite import Sprite
 
-
-class Ship:
+class Ship(Sprite):
     def __init__(self, ai_game):
         self.screen = ai_game.screen
         self.screen_rect = ai_game.screen.get_rect()
@@ -11,8 +11,10 @@ class Ship:
         self.moving_up = False
         self.moving_down = False
 
+        super().__init__()
 
-        self.image = pygame.image.load('D:/Save/Ship6.bmp')
+
+        self.image = pygame.image.load('C:/Python/alien_game/Ship6.bmp')
         self.image = pygame.transform.rotate(self.image, 90)
         self.rect = self.image.get_rect()
         self.rect.midbottom = self.screen_rect.midbottom

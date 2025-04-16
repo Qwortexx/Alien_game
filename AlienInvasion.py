@@ -21,7 +21,7 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
-        self.bg_image = pygame.image.load('D:/Save/background.bmp')
+        self.bg_image = pygame.image.load('C:/Python/alien_game/background.bmp')
         self.bg_image = pygame.transform.scale(self.bg_image, (self.settings.screen_width, self.settings.screen_height))
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -102,6 +102,7 @@ class AlienInvasion:
             # Оновлюємо зображення рахунку
             self.sb.prep_score()
             self.sb.check_high_score()
+            self.sb.prep_health()
 
 
     def _update_screen(self):  # Відображення
@@ -183,14 +184,16 @@ class AlienInvasion:
             self.last_spawn_time = current_time
 
     def _ship_hit(self):
-        self.stats.ship_left -= 1
-        if self.stats.ship_left > 0:
+        self.stats.ship_left -= 1            
+        self.sb.prep_health()
 
+        if self.stats.ship_left > 0:
             self.aliens.empty()
             self.bullets.empty()
 
             self.ship.center_ship()
             self._create_fleet()
+
 
             sleep(1)
         else:
