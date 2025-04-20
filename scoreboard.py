@@ -18,6 +18,7 @@ class Scoreboard:
         self.prep_score()
         self.prep_high_score()
         self.prep_level()
+        self.prep_speed()
         self.prep_labels()
         self.prep_health()
 
@@ -64,6 +65,7 @@ class Scoreboard:
         self.level_label_rect.right = self.level_rect.left - 10
         self.level_label_rect.top = self.level_rect.top
 
+
     def show_score(self):
         # Поточний рахунок
         self.screen.blit(self.score_label, self.score_label_rect)
@@ -76,6 +78,10 @@ class Scoreboard:
         # Рівень
         self.screen.blit(self.level_label, self.level_label_rect)
         self.screen.blit(self.level_image, self.level_rect)
+
+        # Швидкість
+        self.screen.blit(self.speed_label, self.speed_label_rect)
+        self.screen.blit(self.speed_image, self.speed_rect)
 
         self.ships.draw(self.screen)
 
@@ -92,3 +98,18 @@ class Scoreboard:
             ship.rect.y = 10
             self.ships.add(ship)
 
+    
+    def prep_speed(self):
+        # Відображення поточної швидкості корабля
+        speed_str = str(round(self.settings.ship_speed, 2))
+        self.speed_image = self.font.render(speed_str, True, self.text_color, self.sb_color)
+
+        self.speed_rect = self.speed_image.get_rect()
+        self.speed_rect.right = self.level_rect.right
+        self.speed_rect.top = self.level_rect.bottom + 10
+
+        # Мітка для швидкості
+        self.speed_label = self.font.render("Speed: ", True, self.text_color, self.sb_color)
+        self.speed_label_rect = self.speed_label.get_rect()
+        self.speed_label_rect.right = self.speed_rect.left - 10
+        self.speed_label_rect.top = self.speed_rect.top 

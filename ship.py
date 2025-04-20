@@ -14,7 +14,7 @@ class Ship(Sprite):
         super().__init__()
 
 
-        self.image = pygame.image.load('D:/Save/Ship6.bmp')
+        self.image = pygame.image.load('C:/Python/alien_game/Ship6.bmp')
         self.image = pygame.transform.rotate(self.image, 90)
         self.rect = self.image.get_rect()
         self.rect.midbottom = self.screen_rect.midbottom
@@ -22,7 +22,6 @@ class Ship(Sprite):
         self.y = float(self.rect.y)
 
     def update(self):
-
         if self.moving_right and self.rect.right < self.screen_rect.right:
             self.x += self.settings.ship_speed
         if self.moving_left and self.rect.left > 0:

@@ -14,12 +14,13 @@ from scoreboard import Scoreboard
 
 pygame.init()
 
-pygame.mixer.music.load('D:/Save/background_music.mp3')
+pygame.mixer.music.load('C:/Python/alien_game/background_music.mp3')
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
 
-shot_sound = pygame.mixer.Sound('D:/Save/short_shot_sound.wav')
-hit_sound = pygame.mixer.Sound('D:/Save/hit_sound.wav')
+shot_sound = pygame.mixer.Sound('C:/Python/alien_game/short_shot_sound.wav')
+hit_sound = pygame.mixer.Sound('C:/Python/alien_game/hit_sound.wav')
+
 
 class AlienInvasion:
 
@@ -30,7 +31,7 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
-        self.bg_image = pygame.image.load('D:/Save/background.bmp')
+        self.bg_image = pygame.image.load('C:/Python/alien_game/background.bmp')
         self.bg_image = pygame.transform.scale(self.bg_image, (self.settings.screen_width, self.settings.screen_height))
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -39,6 +40,8 @@ class AlienInvasion:
         #self.ship02 = ship02(self)
         self.stats = GameStats(self)
         self.sb = Scoreboard(self)
+        self.last_nitro_time = 0
+        self.nitro_cooldown = 3
 
         self.play_button = Button(self,"Play")
 
@@ -66,6 +69,9 @@ class AlienInvasion:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
+            elif event.type == pygame.USEREVENT + 1:
+            # Таймер для скидання швидкості нітро
+                self._reset_nitro_speed()
 
     def _check_keydown_events(self, event): # Якщо нажали то залежно від кнокпи буде змінюватись змінна на True і буде рух корабля
         if event.key == pygame.K_RIGHT:
@@ -79,6 +85,11 @@ class AlienInvasion:
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
             shot_sound.play()
+        elif event.key == pygame.K_n:
+            current_time = time.time()
+            if current_time - self.last_nitro_time > self.nitro_cooldown:
+                self.ship_nitro()
+                self.last_nitro_time = current_time
         elif event.key == pygame.K_q:
             sys.exit()
 
@@ -191,6 +202,9 @@ class AlienInvasion:
             self.stats.level += 1
             self.sb.prep_level()
 
+            self.increase_speed()
+            self.sb.prep_speed()
+
             self._create_fleet()
             self.last_spawn_time = current_time
 
@@ -218,6 +232,38 @@ class AlienInvasion:
             if alien.rect.bottom >= screen_rect.bottom:
                 self._ship_hit()
                 break
+    
+
+    def ship_nitro(self):
+        current_time = time.time()
+
+        if not hasattr(self.settings, 'base_ship_speed'):
+            self.settings.base_ship_speed = self.settings.ship_speed
+
+        self.settings.ship_speed = self.settings.base_ship_speed + 5
+        self.sb.prep_speed()
+
+            # Плануємо відновлення швидкості через 5 секунд
+        pygame.time.set_timer(pygame.USEREVENT + 1, int(3000), 1)
+        print(f"Прискорення! Поточна швидкість: {self.settings.ship_speed}")
+
+    def _reset_nitro_speed(self):
+        # Відновлюємо базову швидкість і оновлюємо відображення
+        if hasattr(self.settings, 'base_ship_speed'):
+            self.settings.ship_speed = self.settings.base_ship_speed
+            self.sb.prep_speed()
+            print(f"Швидкість відновлена: {self.settings.ship_speed}")
+
+    def increase_speed(self):
+        """Збільшує швидкість гри при підвищенні рівня"""
+        self.settings.ship_speed *= self.settings.speedup_scale
+        self.settings.bullet_speed *= self.settings.speedup_scale
+
+    
+        # Якщо є базова швидкість корабля, також збільшуємо її
+        if hasattr(self, 'base_ship_speed'):
+            self.base_ship_speed *= self.speedup_scale
+
     def _check_play_button(self,mouse_pos):
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         if button_clicked and not self.stats.game_active:

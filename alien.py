@@ -8,7 +8,7 @@ class Alien(Sprite):
         super().__init__()
         self.screen = ai_game.screen
 
-        self.image = pygame.image.load("D:/Save/tiny_ship14.bmp")
+        self.image = pygame.image.load("C:/Python/alien_game/tiny_ship14.bmp")
         self.image = pygame.transform.rotate(self.image, 180)
         self.rect = self.image.get_rect()
         self.rect.x = self.rect.width
