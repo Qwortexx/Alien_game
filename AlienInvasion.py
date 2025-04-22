@@ -14,12 +14,12 @@ from scoreboard import Scoreboard
 
 pygame.init()
 
-pygame.mixer.music.load('C:/Python/alien_game/background_music.mp3')
+pygame.mixer.music.load('C:/Python/alien_gamebackground_music.mp3')
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
 
-shot_sound = pygame.mixer.Sound('C:/Python/alien_game/short_shot_sound.wav')
-hit_sound = pygame.mixer.Sound('C:/Python/alien_game/hit_sound.wav')
+shot_sound = pygame.mixer.Sound('C:/Python/alien_gameshort_shot_sound.wav')
+hit_sound = pygame.mixer.Sound('C:/Python/alien_gamehit_sound.wav')
 
 
 class AlienInvasion:
@@ -31,7 +31,7 @@ class AlienInvasion:
         self.screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
-        self.bg_image = pygame.image.load('C:/Python/alien_game/background.bmp')
+        self.bg_image = pygame.image.load('C:/Python/alien_gamebackground.bmp')
         self.bg_image = pygame.transform.scale(self.bg_image, (self.settings.screen_width, self.settings.screen_height))
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
@@ -125,6 +125,7 @@ class AlienInvasion:
             self.sb.prep_score()
             self.sb.check_high_score()
             self.sb.prep_health()
+            self.sb.prep_speed()
 
 
     def _update_screen(self):  # Відображення
@@ -134,6 +135,7 @@ class AlienInvasion:
             self.ship.blitme()
             self.aliens.draw(self.screen)
             self.sb.show_score()
+            self.sb.prep_speed()
             for bullet in self.bullets.sprites():
                 bullet.draw_bullet()
         else:
@@ -250,7 +252,7 @@ class AlienInvasion:
     def _reset_nitro_speed(self):
         # Відновлюємо базову швидкість і оновлюємо відображення
         if hasattr(self.settings, 'base_ship_speed'):
-            self.settings.ship_speed = self.settings.base_ship_speed
+            self.settings.ship_speed = float(self.settings.base_ship_speed)
             self.sb.prep_speed()
             print(f"Швидкість відновлена: {self.settings.ship_speed}")
 
@@ -261,8 +263,8 @@ class AlienInvasion:
 
     
         # Якщо є базова швидкість корабля, також збільшуємо її
-        if hasattr(self, 'base_ship_speed'):
-            self.base_ship_speed *= self.speedup_scale
+        if hasattr(self.settings, 'base_ship_speed'):
+            self.settings.base_ship_speed *= self.settings.speedup_scale
 
     def _check_play_button(self,mouse_pos):
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
@@ -272,9 +274,14 @@ class AlienInvasion:
             self.stats.game_active = True
             self.stats.game_over = False
 
+            self.settings.ship_speed = 3.0
+            if hasattr(self.settings, 'base_ship_speed'):
+                self.settings.base_ship_speed = 3.0
+
             self.sb.prep_score()
             self.sb.prep_level()
             self.sb.prep_health()
+            self.sb.prep_speed()
 
 
             self.aliens.empty()
