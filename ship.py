@@ -14,7 +14,7 @@ class Ship(Sprite):
         super().__init__()
 
 
-        self.image = pygame.image.load('C:/Python/alien_gameShip6.bmp')
+        self.image = pygame.image.load('D:/Save/Ship6.bmp')
         self.image = pygame.transform.rotate(self.image, 90)
         self.rect = self.image.get_rect()
         self.rect.midbottom = self.screen_rect.midbottom

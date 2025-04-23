@@ -21,6 +21,7 @@ class Scoreboard:
         self.prep_speed()
         self.prep_labels()
         self.prep_health()
+        self.prep_laser_status()
 
     def prep_score(self):
         score_str = str(self.stats.score)
@@ -83,6 +84,8 @@ class Scoreboard:
         self.screen.blit(self.speed_label, self.speed_label_rect)
         self.screen.blit(self.speed_image, self.speed_rect)
 
+        self.screen.blit(self.laser_image, self.laser_rect)
+
         self.ships.draw(self.screen)
 
     def check_high_score(self):
@@ -112,4 +115,17 @@ class Scoreboard:
         self.speed_label = self.font.render("Speed: ", True, self.text_color, self.sb_color)
         self.speed_label_rect = self.speed_label.get_rect()
         self.speed_label_rect.right = self.speed_rect.left - 10
-        self.speed_label_rect.top = self.speed_rect.top 
+        self.speed_label_rect.top = self.speed_rect.top
+
+    def prep_laser_status(self):
+        if self.ai_game.laser_available:
+            laser_str = "LASER READY"
+            self.laser_image = self.font.render(laser_str, True,(255, 0, 0), self.settings.bg_color)
+        else:
+            laser_str = f"LASER: {self.ai_game.aliens_killed_counter}/{self.ai_game.aliens_killed_required}"
+            self.laser_image = self.font.render(laser_str, True,self.text_color, self.settings.bg_color)
+
+
+        self.laser_rect = self.laser_image.get_rect()
+        self.laser_rect.right = self.screen_rect.right - 20
+        self.laser_rect.top = self.speed_rect.bottom + 10
