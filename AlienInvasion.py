@@ -8,19 +8,19 @@ from ship import Ship
 from alien import Alien
 from time import sleep
 from game_stats import GameStats
+from explosion import Explosion
 from button import Button
 from scoreboard import Scoreboard
 from superLaser import SuperLaser
-#from ship02 import ship02
 
 pygame.init()
 
-pygame.mixer.music.load('D:/Save/background_music.mp3')
+pygame.mixer.music.load('C:/Python/alien_game/background_music.mp3')
 pygame.mixer.music.set_volume(0.3)
 pygame.mixer.music.play(-1)
 
-shot_sound = pygame.mixer.Sound('D:/Save/short_shot_sound.wav')
-hit_sound = pygame.mixer.Sound('D:/Save/hit_sound.wav')
+shot_sound = pygame.mixer.Sound('C:/Python/alien_game/short_shot_sound.wav')
+hit_sound = pygame.mixer.Sound('C:/Python/alien_game/hit_sound.wav')
 
 
 class AlienInvasion:
@@ -32,12 +32,13 @@ class AlienInvasion:
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
 
-        self.bg_image = pygame.image.load('D:/Save/background.bmp')
+        self.bg_image = pygame.image.load('C:/Python/alien_game/background.bmp')
         self.bg_image = pygame.transform.scale(self.bg_image, (self.settings.screen_width, self.settings.screen_height))
 
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group()
+        self.explosions = pygame.sprite.Group()
 
         self.last_spawn_time = time.time()
         self.stats = GameStats(self)
@@ -46,7 +47,7 @@ class AlienInvasion:
         self.aliens_killed_counter = 0
         self.aliens_killed_required = 5
         self.laser_available = False
-        self.laser_sound = pygame.mixer.Sound('C:/Users/PK/Downloads/sci-fi-braam-death-ray-om-fx-4-4-00-07.mp3')
+        self.laser_sound = pygame.mixer.Sound('C:/Python/alien_game/sound_lazer.mp3')
 
         # Now create the scoreboard
         self.sb = Scoreboard(self)
@@ -59,6 +60,7 @@ class AlienInvasion:
         self.play_button = Button(self, "Play")
 
         self._create_fleet()
+
     def run_game(self):
         while True:
             current_time = time.time()
@@ -74,6 +76,11 @@ class AlienInvasion:
                         collided_aliens = pygame.sprite.spritecollide(self.super_laser, self.aliens, True)
                         if collided_aliens:
                             hit_sound.play()
+                            # Create explosions for each alien hit by laser
+                            for alien in collided_aliens:
+                                explosion = Explosion(alien.rect.center, self.screen)
+                                self.explosions.add(explosion)
+                                print(f"Created laser explosion at {alien.rect.center}")
                             self.stats.score += self.settings.alien_points * len(collided_aliens)
                             self.sb.prep_score()
                             self.sb.check_high_score()
@@ -143,19 +150,24 @@ class AlienInvasion:
                 self.bullets.remove(bullet)
         print(len(self.bullets))
         # якщо куля влучила в прибульця то вони видаляються
-        collections = pygame.sprite.groupcollide(self.bullets, self.aliens, True,True)
+        collections = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
         if collections:
             hit_sound.play()
-            for aliens in collections.values():
+            print("Hit detected! Creating explosions")
+            for bullet, aliens_list in collections.items():
+                for alien in aliens_list:  # Only create explosions for aliens that were hit
+                    explosion = Explosion(alien.rect.center, self.screen)
+                    self.explosions.add(explosion)
+                    print(f"Created explosion at {alien.rect.center}")
 
-                aliens_killed = len(aliens)
+                aliens_killed = len(aliens_list)
                 self.aliens_killed_counter += aliens_killed
 
                 if not self.laser_available and self.aliens_killed_counter >= self.aliens_killed_required:
                     self.laser_available = True
                     print("Super laser ready!")
                 # Додаємо очки за кожного збитого прибульця
-                self.stats.score += self.settings.alien_points * len(aliens)
+                self.stats.score += self.settings.alien_points * len(aliens_list)
             # Оновлюємо зображення рахунку
             self.sb.prep_score()
             self.sb.check_high_score()
@@ -174,6 +186,13 @@ class AlienInvasion:
                 self.super_laser.drawLaser()
 
             self.aliens.draw(self.screen)
+            
+            # Update and draw explosions
+            self.explosions.update()
+            print(f"Drawing {len(self.explosions)} explosions")
+            for explosion in self.explosions:
+                explosion.draw()
+                
             self.sb.show_score()
             self.sb.prep_speed()
             self.sb.prep_laser_status()
@@ -259,11 +278,11 @@ class AlienInvasion:
         if self.stats.ship_left > 0:
             self.aliens.empty()
             self.bullets.empty()
+            self.explosions.empty()
             self.super_laser.active = False
             self.laser_sound.stop()
             self.ship.center_ship()
             self._create_fleet()
-
 
             sleep(1)
         else:
@@ -288,7 +307,7 @@ class AlienInvasion:
         self.settings.ship_speed = self.settings.base_ship_speed + 5
         self.sb.prep_speed()
 
-            # Плануємо відновлення швидкості через 5 секунд
+        # Плануємо відновлення швидкості через 5 секунд
         pygame.time.set_timer(pygame.USEREVENT + 1, int(3000), 1)
         print(f"Прискорення! Поточна швидкість: {self.settings.ship_speed}")
 
@@ -332,10 +351,9 @@ class AlienInvasion:
             self.sb.prep_speed()
             self.sb.prep_laser_status()
 
-
             self.aliens.empty()
             self.bullets.empty()
-
+            self.explosions.empty()
 
             self._create_fleet()
             self.ship.center_ship()

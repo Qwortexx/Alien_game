@@ -8,11 +8,11 @@ class SuperLaser:
         self.settings = ai_game.settings
         self.ship = ai_game.ship
 
-        self.image = pygame.image.load("C:/Users/PK/Downloads/SuperLaser.bmp")
+        self.image = pygame.image.load("C:/Python/alien_game/laser.png").convert_alpha()
 
-        smaller_image = pygame.transform.scale(self.image, (350, 100))
+        self.image = pygame.transform.scale(self.image, (50, 300))
 
-        self.image = pygame.transform.rotate(smaller_image, 90)
+#        self.image = pygame.transform.rotate(smaller_image, 90)
 
         self.rect = self.image.get_rect()
 

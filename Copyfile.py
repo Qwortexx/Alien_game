@@ -6,10 +6,12 @@
 'D:/Save/short_shot_sound.wav'
 'D:/Save/hit_sound.wav'
 
-"D copy"
-'C:/Python/alien_gameShip6.bmp'
-"C:/Python/alien_gametiny_ship14.bmp"
-'C:/Python/alien_gamebackground.bmp'
-'C:/Python/alien_gamebackground_music.mp3'
-'C:/Python/alien_gameshort_shot_sound.wav'
-'C:/Python/alien_gamehit_sound.wav'
+"Dany copy"
+'C:/Python/alien_game/Ship6.bmp'
+"C:/Python/alien_game/tiny_ship14.bmp"
+'C:/Python/alien_game/background.bmp'
+'C:/Python/alien_game/background_music.mp3'
+'C:/Python/alien_game/short_shot_sound.wav'
+'C:/Python/alien_game/hit_sound.wav'
+'C:/Python/alien_game/sound_lazer.mp3'
+"C:/Python/alien_game/SuperLaser.bmp"
