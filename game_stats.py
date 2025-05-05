@@ -5,6 +5,7 @@ class GameStats:
         self.reset_stats()
         self.game_active = False
         self.game_over = False
+        self.show_intro = True
 
 
     def reset_stats(self):

@@ -12,15 +12,15 @@ from explosion import Explosion
 from button import Button
 from scoreboard import Scoreboard
 from superLaser import SuperLaser
+from video_player import StarWarsIntro
 
 pygame.init()
 
-pygame.mixer.music.load('C:/Python/alien_game/background_music.mp3')
+pygame.mixer.music.load('D:/Save/background_music.mp3')
 pygame.mixer.music.set_volume(0.3)
-pygame.mixer.music.play(-1)
 
-shot_sound = pygame.mixer.Sound('C:/Python/alien_game/short_shot_sound.wav')
-hit_sound = pygame.mixer.Sound('C:/Python/alien_game/hit_sound.wav')
+shot_sound = pygame.mixer.Sound('D:/Save/short_shot_sound.wav')
+hit_sound = pygame.mixer.Sound('D:/Save/hit_sound.wav')
 
 
 class AlienInvasion:
@@ -32,7 +32,7 @@ class AlienInvasion:
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
 
-        self.bg_image = pygame.image.load('C:/Python/alien_game/background.bmp')
+        self.bg_image = pygame.image.load('D:/Save/background.bmp')
         self.bg_image = pygame.transform.scale(self.bg_image, (self.settings.screen_width, self.settings.screen_height))
 
         self.ship = Ship(self)
@@ -43,11 +43,13 @@ class AlienInvasion:
         self.last_spawn_time = time.time()
         self.stats = GameStats(self)
 
-        # Initialize laser attributes BEFORE creating the scoreboard
+        self.intro = StarWarsIntro(self.screen)
+        self.clock = pygame.time.Clock()
+
         self.aliens_killed_counter = 0
         self.aliens_killed_required = 5
         self.laser_available = False
-        self.laser_sound = pygame.mixer.Sound('C:/Python/alien_game/sound_lazer.mp3')
+        self.laser_sound = pygame.mixer.Sound('C:/Users/PK/Downloads/sci-fi-braam-death-ray-om-fx-4-4-00-07.mp3')
 
         # Now create the scoreboard
         self.sb = Scoreboard(self)
@@ -62,10 +64,22 @@ class AlienInvasion:
         self._create_fleet()
 
     def run_game(self):
+        if self.stats.show_intro:
+            self.intro.start()
+
         while True:
+            dt = self.clock.tick(60) / 1000.0
             current_time = time.time()
             self._check_events()
-            if self.stats.game_active:
+
+            if self.stats.show_intro:
+                self.intro.update(dt)
+                self._update_intro_screen()
+                if self.intro.is_finished():
+                    self.stats.show_intro = False
+                    pygame.mixer.music.play(-1)  # Запускаємо фонову музику після інтро
+            elif self.stats.game_active:
+                # Активний ігровий режим
                 self.ship.update()
                 self.bullets.update()
 
@@ -80,7 +94,6 @@ class AlienInvasion:
                             for alien in collided_aliens:
                                 explosion = Explosion(alien.rect.center, self.screen)
                                 self.explosions.add(explosion)
-                                print(f"Created laser explosion at {alien.rect.center}")
                             self.stats.score += self.settings.alien_points * len(collided_aliens)
                             self.sb.prep_score()
                             self.sb.check_high_score()
@@ -88,10 +101,13 @@ class AlienInvasion:
                 self._update_bullet()
                 self._update_alien()
                 self._update_alien_position()
-            self._update_screen()
+                self._update_screen()
+            else:
+                # Меню гри або Game Over
+                self._update_screen()
 
     def _check_events(self):
-        for event in pygame.event.get(): # перевірка чи кнопку нажато чи ні
+        for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -102,11 +118,16 @@ class AlienInvasion:
             elif event.type == pygame.KEYUP:
                 self._check_keyup_events(event)
             elif event.type == pygame.USEREVENT + 1:
-            # Таймер для скидання швидкості нітро
+                # Таймер для скидання швидкості нітро
                 self._reset_nitro_speed()
 
-    def _check_keydown_events(self, event): # Якщо нажали то залежно від кнокпи буде змінюватись змінна на True і буде рух корабля
-        if event.key == pygame.K_RIGHT:
+    def _check_keydown_events(self, event):
+        if self.stats.show_intro and event.key == pygame.K_RETURN:
+            # Пропуск інтро при натисканні Enter
+            self.intro.skip()
+            self.stats.show_intro = False
+            pygame.mixer.music.play(-1)  # Запускаємо фонову музику після пропуску
+        elif event.key == pygame.K_RIGHT:
             self.ship.moving_right = True
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
@@ -127,8 +148,11 @@ class AlienInvasion:
         elif event.key == pygame.K_1:
             self._activate_super_laser()
 
+    def _update_intro_screen(self):
+        self.intro.draw()
+        pygame.display.flip()
 
-    def _check_keyup_events(self, event): # Якщо відпустили
+    def _check_keyup_events(self, event):  # Якщо відпустили
         if event.key == pygame.K_RIGHT:
             self.ship.moving_right = False
         elif event.key == pygame.K_LEFT:
@@ -138,27 +162,26 @@ class AlienInvasion:
         elif event.key == pygame.K_DOWN:
             self.ship.moving_down = False
 
-    def _fire_bullet(self):# максимальна кількість пуль 5, перевірка чи не більше 5 якщо більше 5 то стріляти неможливо
+    def _fire_bullet(
+            self):  # максимальна кількість пуль 5, перевірка чи не більше 5 якщо більше 5 то стріляти неможливо
         if len(self.bullets) < self.settings.bullet_allowed:
             new_bullet = Bullet(self)
             self.bullets.add(new_bullet)
 
-    def _update_bullet(self): # якщо куля за екраном то вона видаляться
+    def _update_bullet(self):  # якщо куля за екраном то вона видаляться
         self.bullets.update()
         for bullet in self.bullets.copy():
             if bullet.rect.bottom <= 0:
                 self.bullets.remove(bullet)
-        print(len(self.bullets))
+
         # якщо куля влучила в прибульця то вони видаляються
         collections = pygame.sprite.groupcollide(self.bullets, self.aliens, True, True)
         if collections:
             hit_sound.play()
-            print("Hit detected! Creating explosions")
             for bullet, aliens_list in collections.items():
                 for alien in aliens_list:  # Only create explosions for aliens that were hit
                     explosion = Explosion(alien.rect.center, self.screen)
                     self.explosions.add(explosion)
-                    print(f"Created explosion at {alien.rect.center}")
 
                 aliens_killed = len(aliens_list)
                 self.aliens_killed_counter += aliens_killed
@@ -175,7 +198,6 @@ class AlienInvasion:
             self.sb.prep_speed()
             self.sb.prep_laser_status()
 
-
     def _update_screen(self):  # Відображення
         self.screen.blit(self.bg_image, (0, 0))
 
@@ -186,13 +208,12 @@ class AlienInvasion:
                 self.super_laser.drawLaser()
 
             self.aliens.draw(self.screen)
-            
+
             # Update and draw explosions
             self.explosions.update()
-            print(f"Drawing {len(self.explosions)} explosions")
             for explosion in self.explosions:
                 explosion.draw()
-                
+
             self.sb.show_score()
             self.sb.prep_speed()
             self.sb.prep_laser_status()
@@ -201,7 +222,7 @@ class AlienInvasion:
                 bullet.draw_bullet()
         else:
             if self.stats.game_over:
-               self._show_game_over()
+                self._show_game_over()
             self.play_button.draw_button()
 
         pygame.display.flip()
@@ -241,7 +262,6 @@ class AlienInvasion:
         alien.rect.y = alien_height
         self.aliens.add(alien)
 
-
     def _update_alien(self):
         self.aliens.update()
         for alien in self.aliens.copy():
@@ -251,7 +271,6 @@ class AlienInvasion:
             elif pygame.sprite.spritecollideany(self.ship, self.aliens):
                 print("Ship hit!!!")
                 self._ship_hit()
-        print(len(self.aliens))
 
     def _update_alien_position(self):
         current_time = time.time()
@@ -272,7 +291,7 @@ class AlienInvasion:
             self.last_spawn_time = current_time
 
     def _ship_hit(self):
-        self.stats.ship_left -= 1            
+        self.stats.ship_left -= 1
         self.sb.prep_health()
 
         if self.stats.ship_left > 0:
@@ -296,7 +315,6 @@ class AlienInvasion:
             if alien.rect.bottom >= screen_rect.bottom:
                 self._ship_hit()
                 break
-    
 
     def ship_nitro(self):
         current_time = time.time()
@@ -323,12 +341,11 @@ class AlienInvasion:
         self.settings.ship_speed *= self.settings.speedup_scale
         self.settings.bullet_speed *= self.settings.speedup_scale
 
-    
         # Якщо є базова швидкість корабля, також збільшуємо її
         if hasattr(self.settings, 'base_ship_speed'):
             self.settings.base_ship_speed *= self.settings.speedup_scale
 
-    def _check_play_button(self,mouse_pos):
+    def _check_play_button(self, mouse_pos):
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         if button_clicked and not self.stats.game_active:
 
