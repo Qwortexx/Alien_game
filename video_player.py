@@ -10,14 +10,17 @@ class StarWarsIntro:
 
         # Шрифти для інтро
         self.title_font = pygame.font.SysFont('arial', 72, bold=True)
+        self.title2_font = pygame.font.SysFont('arial', 40, bold=True)
         self.text_font = pygame.font.SysFont('arial', 36)
 
         # Кольори
         self.yellow = (255, 232, 31)
+        self.white = (208,207,203)
         self.blue = (0, 0, 0)
 
         # Текст інтро
         self.title = "ALIEN INVASION"
+        self.title2 = "Press ENTER for skip intro" 
         self.intro_text = [
             "Episode I",
             "THE SPACE DEFENDER",
@@ -108,6 +111,10 @@ class StarWarsIntro:
         title_rect = title_surface.get_rect(center=(self.width // 2, 100))
         self.screen.blit(title_surface, title_rect)
 
+        # Малюємо підзаголовок (постійно вгорі)
+        title2_surface = self.title2_font.render(self.title2, True, self.white)
+        title2_rect = title2_surface.get_rect(center=(self.width // 2 + 500, 850))
+        self.screen.blit(title2_surface, title2_rect)
         # Малюємо текст, що рухається
         y_offset = self.current_pos
 

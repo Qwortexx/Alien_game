@@ -9,7 +9,7 @@ class Settings:
         self.bullet_height = 17
         self.bullet_width = 5
         self.bullet_color = (255, 0, 0)
-        self.bullet_allowed = 5
+        self.bullet_allowed = 3
 
         self.speedup_scale = 1.1
 
@@ -18,3 +18,4 @@ class Settings:
         self.ship_left = 3
 
         self.alien_points = 50
+        self.boss_speed = 1.0

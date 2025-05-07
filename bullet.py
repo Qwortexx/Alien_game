@@ -8,7 +8,7 @@ class Bullet(Sprite):
         super().__init__() #super для належного успадкування Sprite
         self.screen = ai_game.screen
         self.settings = ai_game.settings
-        self.image = pygame.image.load('D:/Save/Ship6.bmp')
+        self.image = pygame.image.load('C:/Python/alien_game/Ship6.bmp')
                
         # Завантаження зображення кулі
         self.image = pygame.image.load("C:/Python/alien_game/bullet.png").convert_alpha()  # convert_alpha() для прозорості
@@ -26,3 +26,24 @@ class Bullet(Sprite):
 
      def draw_bullet(self):
         self.screen.blit(self.scaled_image, self.rect)
+
+
+class BossBullet(Sprite):
+    
+
+    def __init__(self, screen, x, y):
+        super().__init__()
+        self.screen = screen
+        self.image = pygame.image.load("C:/Python/alien_game/bullet.png").convert_alpha()  # convert_alpha() для прозорості
+        self.image = pygame.transform.rotate(self.image, 90)
+        self.rect = self.image.get_rect()
+        self.rect.centerx = x
+        self.rect.top = y
+        self.y = float(self.rect.y)
+        self.speed = 3
+
+    def update(self):
+        self.y += self.speed
+        self.rect.y = int(self.y)
+        if self.rect.top > self.screen.get_rect().bottom:
+            self.kill()
