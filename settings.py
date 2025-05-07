@@ -4,12 +4,12 @@ class Settings:
         self.screen_width = 1600
         self.screen_height = 1000
         self.bg_color = (230,230,230)
-        self.ship_speed = 3 
+        self.ship_speed = 5
         self.bullet_speed = 3.0
         self.bullet_height = 17
         self.bullet_width = 5
         self.bullet_color = (255, 0, 0)
-        self.bullet_allowed = 3
+        self.bullet_allowed = 5
 
         self.speedup_scale = 1.1
 
@@ -18,4 +18,4 @@ class Settings:
         self.ship_left = 3
 
         self.alien_points = 50
-        self.boss_speed = 1.0
+        self.boss_speed = 3.0

@@ -1,44 +1,40 @@
 import pygame
 
 
+class EndCredit:
 
-class StarWarsIntro:
     def __init__(self, screen):
         self.screen = screen
         self.screen_rect = screen.get_rect()
         self.width, self.height = self.screen_rect.width, self.screen_rect.height
 
-        # Шрифти для інтро
-        self.title_font = pygame.font.SysFont('arial', 72, bold=True)
-        self.title2_font = pygame.font.SysFont('arial', 40, bold=True)
+        self.title_font = pygame.font.SysFont('arial', 68, bold=True)
         self.text_font = pygame.font.SysFont('arial', 36)
 
-        # Кольори
-        self.yellow = (255, 232, 31)
-        self.white = (208,207,203)
-        self.blue = (0, 0, 0)
+        self.yellow = (255, 255, 0)
+        self.white = (255, 255, 255)
+        self.blue = (0, 100, 255)
 
-        # Текст інтро
-        self.title = "ALIEN INVASION"
-        self.title2 = "Press ENTER for skip intro" 
-        self.intro_text = [
-            "Episode I",
-            "THE SPACE DEFENDER",
+        self.title_text = "Victory!"
+        self.credits = [
+            "Congratulations! You have saved the galaxy from invasion!",
             "",
-            "In a galaxy far, far away...",
+            "The Space Defenders thank you for your bravery",
+            "and dedication to the cause of peace in the Universe.",
             "",
-            "Earth's last defender stands against",
-            "an endless invasion of alien forces.",
+            "Thanks to your efforts, the threat has been eliminated,",
+            "and the planets of our system can rest easy.",
             "",
-            "With only a small spaceship and limited",
-            "resources, you must protect your planet",
-            "from the relentless alien attackers.",
+            "But stay vigilant, for evil never sleeps...",
             "",
-            "Use your skill and quick reflexes to defeat",
-            "the enemy and become the savior of humanity...",
+            "Until the next adventure, space hero!",
+            "",
+            "Developers: Qwortex, Danilo ",
+            "Music: Space Sound Effects",
+            "",
+            "Press SPACE to return to the main menu"
         ]
 
-        # Параметри анімації
         self.start_pos = self.height
         self.current_pos = self.start_pos
         self.scroll_speed = 40.0
@@ -54,7 +50,7 @@ class StarWarsIntro:
         try:
             self.intro_music = pygame.mixer.Sound('D:/Save/intro.mp3')
         except:
-            print("Неможливо завантажити музику для інтро. Переконайтеся, що файл існує.")
+            print("Неможливо завантажити музику для кінцевих титрів. Переконайтеся, що файл існує.")
             self.intro_music = None
 
     def generate_stars(self, count):
@@ -68,7 +64,6 @@ class StarWarsIntro:
             self.stars.append((x, y, size, brightness))
 
     def start(self):
-        """Починає анімацію інтро"""
         self.started = True
         self.finished = False
         self.current_pos = self.start_pos
@@ -79,15 +74,14 @@ class StarWarsIntro:
             self.intro_music.play()
 
     def update(self, dt):
-        """Оновлює позицію тексту"""
         if not self.started:
             return
 
         # Рухаємо текст вгору
         self.current_pos -= self.scroll_speed * dt
 
-        # Перевіряємо, чи інтро закінчилося
-        total_text_height = len(self.intro_text) * self.text_font.get_height() + 200
+        # Перевіряємо, чи титри закінчилися
+        total_text_height = len(self.credits) * self.text_font.get_height() + 200
         if self.current_pos < -total_text_height:
             self.finished = True
             self.started = False
@@ -95,7 +89,6 @@ class StarWarsIntro:
                 self.intro_music.stop()
 
     def draw(self):
-        """Відображає інтро"""
         if not self.started:
             return
 
@@ -107,18 +100,14 @@ class StarWarsIntro:
             pygame.draw.circle(self.screen, (brightness, brightness, brightness), (x, y), size)
 
         # Малюємо заголовок (постійно вгорі)
-        title_surface = self.title_font.render(self.title, True, self.yellow)
+        title_surface = self.title_font.render(self.title_text, True, self.yellow)
         title_rect = title_surface.get_rect(center=(self.width // 2, 100))
         self.screen.blit(title_surface, title_rect)
 
-        # Малюємо підзаголовок (постійно вгорі)
-        title2_surface = self.title2_font.render(self.title2, True, self.white)
-        title2_rect = title2_surface.get_rect(center=(self.width // 2 + 500, 850))
-        self.screen.blit(title2_surface, title2_rect)
         # Малюємо текст, що рухається
         y_offset = self.current_pos
 
-        for line in self.intro_text:
+        for line in self.credits:
             if not line:  # Порожній рядок
                 y_offset += self.text_font.get_height() // 2
                 continue
@@ -139,7 +128,6 @@ class StarWarsIntro:
             y_offset += self.text_font.get_height() * 1.2
 
     def skip(self):
-        """Пропускає інтро"""
         if self.started:
             self.finished = True
             self.started = False
@@ -149,5 +137,4 @@ class StarWarsIntro:
         return False
 
     def is_finished(self):
-        """Перевіряє, чи інтро закінчилося"""
         return self.finished

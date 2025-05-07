@@ -6,6 +6,7 @@ class GameStats:
         self.game_active = False
         self.game_over = False
         self.show_intro = True
+        self.game_won = False
 
 
     def reset_stats(self):
@@ -13,6 +14,6 @@ class GameStats:
         self.score = 0
         self.game_over = False
         self.level = 1
-        self.settings.ship_speed = 3
+        self.settings.ship_speed = 1
         if hasattr(self.settings, 'base_ship_speed'):
-            self.settings.base_ship_speed = 3.0
+            self.settings.base_ship_speed = 1.0

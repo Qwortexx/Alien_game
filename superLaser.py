@@ -11,7 +11,7 @@ class SuperLaser:
         self.frames = []
         for i in range(1,6):
             try:
-                image = pygame.image.load(f"C:/Python/alien_game/laser{i}.png").convert_alpha()
+                image = pygame.image.load(f'D:/Save/laser{i}.png').convert_alpha()
                 image = pygame.transform.scale(image, (50, 300))
                 self.frames.append(image)
 
@@ -19,7 +19,7 @@ class SuperLaser:
                 if len(self.frames)>0:
                     self.frames.append(self.frames[0])
                 else:
-                    image = pygame.image.load("C:/Python/alien_game/laser1.png").convert_alpha()
+                    image = pygame.image.load('D:/Save/laser1.png').convert_alpha()
                     image = pygame.transform.scale(image, (50, 300))
                     self.frames.append(image)
 

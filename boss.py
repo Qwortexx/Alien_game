@@ -16,19 +16,19 @@ class Boss(Sprite):
         self.stats = ai_game.stats
 
         # Завантаження звуків
-        self.attack_sound = pygame.mixer.Sound('C:/Python/alien_game/boss_attack.mp3')
-        self.explosion_sound = pygame.mixer.Sound('C:/Python/alien_game/boss_burst_louder.wav')
+        self.attack_sound = pygame.mixer.Sound('D:/Save/boss_attack.mp3')
+        self.explosion_sound = pygame.mixer.Sound('D:/Save/boss_burst_louder.wav')
         
         # Завантаження зображень
-        self.image = pygame.image.load('C:/Python/alien_game/boss.gif')  # основне зображення
-        self.explosion_image = pygame.image.load('C:/Python/alien_game/boss_burst_image.webp')  # вибух
+        self.image = pygame.image.load('D:/Save/boss.jpg')  # основне зображення
+        self.explosion_image = pygame.image.load('D:/Save/burst.png')  # вибух
         self.rect = self.image.get_rect()
         self.screen_rect = self.screen.get_rect()
 
         self.rect.midtop = self.screen_rect.midtop
         self.x = float(self.rect.x)
 
-        self.health = 10
+        self.health = 5
         self.alive = True
         self.direction = 1  # 1 = вправо, -1 = вліво
         self.moving = True
@@ -90,7 +90,7 @@ class Boss(Sprite):
 
     def die(self):
         self.alive = False
-        self.explosion_sound.set_volume(3.0)  # Максимальна гучність
+        self.explosion_sound.set_volume(0.3)  # Максимальна гучність
         self.explosion_sound.play()
         self.image = self.explosion_image
         pygame.time.set_timer(pygame.USEREVENT + 2, 1000)  # зникне через 1 сек

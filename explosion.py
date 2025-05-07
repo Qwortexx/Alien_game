@@ -18,7 +18,7 @@ class Explosion(pygame.sprite.Sprite):
 
         # Load and scale explosion image
         try:
-            self.image = pygame.image.load("C:/Python/alien_game/burst.png").convert_alpha()
+            self.image = pygame.image.load("D:/Save/burst.png").convert_alpha()
             EXPLOSION_SIZE = (200, 200) if self.is_boss else (50, 50)
             self.image = pygame.transform.scale(self.image, EXPLOSION_SIZE)
             print("Explosion image loaded successfully!")

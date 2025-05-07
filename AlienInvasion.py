@@ -14,16 +14,17 @@ from scoreboard import Scoreboard
 from superLaser import SuperLaser
 from video_player import StarWarsIntro
 from boss import Boss
+from end_credits import EndCredit
 
 pygame.mixer.init()
 pygame.init()
 
-pygame.mixer.music.load('C:/Python/alien_game/background_music.mp3')
+pygame.mixer.music.load('D:/Save/background_music.mp3')
 pygame.mixer.music.set_volume(0.3)
 
 # Завантаження звуків
-shot_sound = pygame.mixer.Sound('C:/Python/alien_game/short_shot_sound.wav')
-hit_sound = pygame.mixer.Sound('C:/Python/alien_game/hit_sound.wav')
+shot_sound = pygame.mixer.Sound('D:/Save/short_shot_sound.wav')
+hit_sound = pygame.mixer.Sound('D:/Save/hit_sound.wav')
 
 
 
@@ -37,7 +38,7 @@ class AlienInvasion:
         self.settings.screen_width = self.screen.get_rect().width
         self.settings.screen_height = self.screen.get_rect().height
 
-        self.bg_image = pygame.image.load('C:/Python/alien_game/background.bmp')
+        self.bg_image = pygame.image.load('D:/Save/background.bmp')
         self.bg_image = pygame.transform.scale(self.bg_image, (self.settings.screen_width, self.settings.screen_height))
 
         self.ship = Ship(self)
@@ -56,9 +57,8 @@ class AlienInvasion:
         self.aliens_killed_counter = 0
         self.aliens_killed_required = 5
         self.laser_available = False
-        self.laser_sound = pygame.mixer.Sound('C:/Python/alien_game/sound_lazer.mp3')
+        self.laser_sound = pygame.mixer.Sound('C:/Users/PK/Downloads/sci-fi-braam-death-ray-om-fx-4-4-00-07.mp3')
 
-        # Now create the scoreboard
         self.sb = Scoreboard(self)
 
         self.last_nitro_time = 0
@@ -70,13 +70,15 @@ class AlienInvasion:
 
         self._create_fleet()
 
-        
+        self.endcredits = EndCredit(self.screen)
+        self.show_credits = False
+
         self.boss = None
         self.boss_spawned = False
-        
+
         self.stats.game_won = False
         self.super_laser_active = False
-        
+
         self.boss_death_time = None
         self.game_end_delay = 3  # затримка у секундах
 
@@ -122,12 +124,11 @@ class AlienInvasion:
                             self.stats.score += self.settings.alien_points * len(collided_aliens)
                             self.sb.prep_score()
                             self.sb.check_high_score()
-                
+
                 if self.boss and self.boss.alive:
                     self._check_boss_collisions()
                     self._check_boss_death()
                     self._check_boss_bullets_collisions()
-
 
 
                 self._update_bullet()
@@ -213,23 +214,21 @@ class AlienInvasion:
                 self.boss.hit(3)
 
     def _check_boss_death(self):
-        # Перевіряємо, чи настав час завершити гру після смерті боса
+        # Якщо бос існує і мертвий, але таймер ще не запущений
+        if self.boss and self.boss.health <= 0 and self.boss_death_time is None:
+            self.boss_explosions.add(Explosion(self.boss.rect.center, self.screen, is_boss=True))
+            self.boss_death_time = time.time()
+            self.boss.alive = False  # Щоб уникнути подальших оновлень
+
+        # Якщо таймер вже запущено
         if self.boss_death_time is not None:
             if time.time() - self.boss_death_time >= self.game_end_delay:
-                self.boss = None
                 self.stats.game_active = False
                 self.stats.game_won = True
                 pygame.mouse.set_visible(True)
-            return  # Виходимо, якщо таймер вже запущено
-    
-        # Якщо бос мертвий, запускаємо таймер вибуху
-        if self.boss and self.boss.health <= 0:
 
-            self.boss_explosions.add(Explosion(self.boss.rect.center, self.screen, is_boss=True))
-            self.boss_death_time = time.time()
-    
 
-    
+
     def _fire_bullet(self):  # максимальна кількість пуль 5, перевірка чи не більше 5 якщо більше 5 то стріляти неможливо
         if len(self.bullets) < self.settings.bullet_allowed:
             new_bullet = Bullet(self)
@@ -266,6 +265,19 @@ class AlienInvasion:
             self.sb.prep_laser_status()
 
     def _update_screen(self):  # Відображення
+        if self.stats.game_won and not self.show_credits:
+            self.endcredits = EndCredit(self.screen)
+            self.show_credits = True
+        if self.show_credits:
+            self.endcredits.update()
+            self.endcredits.draw()
+            if self.endcredits.is_finished():
+                pygame.quit()
+                sys.exit()
+            pygame.display.flip()
+            return
+
+
         self.screen.blit(self.bg_image, (0, 0))
 
         if self.stats.game_active:
@@ -274,7 +286,7 @@ class AlienInvasion:
                 self.boss.update()
                 self.boss.draw()
                 self.boss.draw_health_bar()
-            
+
             if self.stats.game_won:
                 self._draw_victory_message()
 
@@ -288,7 +300,7 @@ class AlienInvasion:
             self.explosions.update()
             for explosion in self.explosions:
                 explosion.draw()
-            
+
             self.boss_explosions.update()
             for explosion in self.boss_explosions:
                 explosion.draw()
@@ -359,17 +371,17 @@ class AlienInvasion:
             self.sb.prep_level()
             self.increase_speed()
             self.sb.prep_speed()
-            
+
             if self.stats.level == 3 and not self.boss_spawned:
                 self.boss = Boss(self)
                 self.boss_spawned = True
             else:
                 self._create_fleet()
-            
+
             self.last_spawn_time = current_time
 
     def _ship_hit(self):
-        
+
         """Обробка зіткнення корабля з ворогами."""
 
         self.stats.ship_left -= 1
@@ -422,11 +434,18 @@ class AlienInvasion:
         if hasattr(self.settings, 'base_ship_speed'):
             self.settings.base_ship_speed *= self.settings.speedup_scale
 
+    def reset_boss(self):
+        self.boss = None
+        self.boss_spawned = False
+        self.boss_death_time = None
+
     def _check_play_button(self, mouse_pos):
         button_clicked = self.play_button.rect.collidepoint(mouse_pos)
         if button_clicked and not self.stats.game_active:
 
             self.stats.reset_stats()
+            self.stats.level = 1
+            self.reset_boss()
 
             self.aliens_killed_counter = 0
             self.laser_available = False
@@ -435,9 +454,9 @@ class AlienInvasion:
             self.stats.game_active = True
             self.stats.game_over = False
 
-            self.settings.ship_speed = 3.0
+            self.settings.ship_speed = 5.0
             if hasattr(self.settings, 'base_ship_speed'):
-                self.settings.base_ship_speed = 3.0
+                self.settings.base_ship_speed = 5.0
 
             self.sb.prep_score()
             self.sb.prep_level()
@@ -480,8 +499,8 @@ class AlienInvasion:
                         self.stats.game_active = False
                         self.stats.game_over = True
                         pygame.mouse.set_visible(True)
-                    
-                        
+
+
 
     def _show_game_over(self):
         """Відображає екран Game Over і кнопку Play."""

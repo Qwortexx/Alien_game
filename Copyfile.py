@@ -6,6 +6,7 @@
 'D:/Save/short_shot_sound.wav'
 'D:/Save/hit_sound.wav'
 'C:/Users/PK/Downloads/sci-fi-braam-death-ray-om-fx-4-4-00-07.mp3'
+'D:/Save/laser{i}.png'
 
 "Dany copy"
 'C:/Python/alien_game/Ship6.bmp'
