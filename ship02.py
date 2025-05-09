@@ -7,7 +7,7 @@ class ship02:
         self.screen2 = ai_game2.screen
         self.screen2_rect = ai_game2.screen.get_rect()
 
-        self.image = pygame.image.load('D:/Save/tiny_ship14.bmp')
+        self.image = pygame.image.load("C:/Python/alien_game/tiny_ship14.bmp")
         self.rect = self.image.get_rect()
         self.rect.midtop = self.screen2_rect.midtop
 

@@ -18,6 +18,11 @@ class StarWarsIntro:
         self.white = (208,207,203)
         self.blue = (0, 0, 0)
 
+        # Фонова музика
+        self.background_music = pygame.mixer.Sound('C:/Python/alien_game/background_music.mp3')
+        self.background_music.set_volume(0.3)
+        self.background_music_channel = pygame.mixer.Channel(0)
+
         # Текст інтро
         self.title = "ALIEN INVASION"
         self.title2 = "Press ENTER for skip intro" 
@@ -52,7 +57,7 @@ class StarWarsIntro:
 
         # Звук
         try:
-            self.intro_music = pygame.mixer.Sound('D:/Save/intro.mp3')
+            self.intro_music = pygame.mixer.Sound('C:/Python/alien_game/intro.mp3')
         except:
             print("Неможливо завантажити музику для інтро. Переконайтеся, що файл існує.")
             self.intro_music = None
@@ -145,6 +150,7 @@ class StarWarsIntro:
             self.started = False
             if self.intro_music:
                 self.intro_music.stop()
+                self.background_music_channel.play(self.background_music, loops=-1)
             return True
         return False
 

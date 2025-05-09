@@ -16,19 +16,19 @@ class Boss(Sprite):
         self.stats = ai_game.stats
 
         # Завантаження звуків
-        self.attack_sound = pygame.mixer.Sound('D:/Save/boss_attack.mp3')
-        self.explosion_sound = pygame.mixer.Sound('D:/Save/boss_burst_louder.wav')
+        self.attack_sound = pygame.mixer.Sound('C:/Python/alien_game/boss_attack.mp3')
+        self.explosion_sound = pygame.mixer.Sound('C:/Python/alien_game/boss_burst_louder.wav')
         
         # Завантаження зображень
-        self.image = pygame.image.load('D:/Save/boss.jpg')  # основне зображення
-        self.explosion_image = pygame.image.load('D:/Save/burst.png')  # вибух
+        self.image = pygame.image.load('C:/Python/alien_game/boss.png').convert_alpha()  # основне зображення
+        self.explosion_image = pygame.image.load('C:/Python/alien_game/burst.png')  # вибух
         self.rect = self.image.get_rect()
         self.screen_rect = self.screen.get_rect()
 
         self.rect.midtop = self.screen_rect.midtop
         self.x = float(self.rect.x)
 
-        self.health = 5
+        self.health = 20
         self.alive = True
         self.direction = 1  # 1 = вправо, -1 = вліво
         self.moving = True
@@ -47,9 +47,9 @@ class Boss(Sprite):
             if self.rect.right >= self.screen_rect.right or self.rect.left <= 0:
                 self.direction *= -1
 
-        # Атака кожні 5 сек
+        # Атака боса
         current_time = time.time()
-        if current_time - self.last_attack_time > 3:
+        if current_time - self.last_attack_time > self.settings.boss_attack_delay:
             self.attack()
             self.last_attack_time = current_time
 
@@ -60,11 +60,11 @@ class Boss(Sprite):
         self.moving = False
         self.attack_sound.play()
 
-        for i in range(10):  # 5 куль
+        for i in range(5):  # 5 куль
             offset = i * 100 
-            bullet = BossBullet(self.screen, self.rect.centerx + offset, self.rect.bottom)
+            bullet = BossBullet(self.screen, self.rect.centerx + offset, self.rect.bottom - 100)
             self.bullets.add(bullet)
-        pygame.time.set_timer(pygame.USEREVENT + 1, 1000)  # через 1 сек знову рух
+        pygame.time.set_timer(pygame.USEREVENT + 1, 200)  # через 1 сек знову рух
 
     def draw(self):
         if self.alive:
@@ -84,7 +84,10 @@ class Boss(Sprite):
 
     def hit(self, damage):
         self.health -= damage
-        self.direction *= -1.4
+        self.direction *= -1.2
+        self.settings.boss_attack_delay -= 0.08
+        self.attack()
+
         if self.health <= 0:
             self.die()
 

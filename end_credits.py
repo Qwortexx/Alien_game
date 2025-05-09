@@ -29,8 +29,9 @@ class EndCredit:
             "",
             "Until the next adventure, space hero!",
             "",
-            "Developers: Qwortex, Danilo ",
-            "Music: Space Sound Effects",
+            "Developers: Qwortexx, Danylo20006 ",
+            "",
+            "Music: Star Wars Theme Song By John Williams ",
             "",
             "Press SPACE to return to the main menu"
         ]
